@@ -47,12 +47,10 @@ class Orders {
       }}', '{${O.quantity}}', '${user_id}', '${
         O.status === "complete" ? "complete" : "active"
       }' ) RETURNING *`;
-      console.log(sql);
 
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
-      console.log(result.rows);
 
       return result.rows[0];
     } catch (err) {
