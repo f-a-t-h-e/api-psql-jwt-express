@@ -23,7 +23,7 @@ const product_5: Product = {
   price: 1,
 };
 const products = [product_1, product_2, product_3, product_4, product_5];
-fdescribe("Test Products model CRUD operatins", () => {
+describe("Test Products model CRUD operatins", () => {
   beforeAll(async () => {});
   it("should create products", async () => {
     product_1.product_id = (await store.create(product_1)).product_id;
