@@ -3,11 +3,11 @@ dotenv.config();
 import Client from "../db/connect";
 import bcrypt from "bcrypt";
 interface User {
-  id?: string;
+  user_id?: string;
   email: string;
   first_name: string;
   last_name: string;
-  password: string;
+  password?: string;
 }
 
 const hashPass = (pass: string): string => {
@@ -18,7 +18,7 @@ const hashPass = (pass: string): string => {
 class Users {
   async getAll(): Promise<User[]> {
     try {
-      const sql = `SELECT id, email, first_name, last_name FROM Users;`;
+      const sql = `SELECT user_id, email, first_name, last_name FROM Users;`;
       const conn = await Client.connect();
       const result = await conn.query(sql);
 
@@ -28,15 +28,15 @@ class Users {
       throw new Error(`Couldn't INDEX any Users. Error: ${err}`);
     }
   }
-  async getOne(id: string): Promise<User> {
+  async getOne(user_id: string): Promise<User> {
     try {
-      const sql = `SELECT id, email, first_name, last_name FROM users WHERE id=($1)`;
+      const sql = `SELECT user_id, email, first_name, last_name FROM users WHERE id='${user_id}'`;
       const conn = await Client.connect();
-      const result = await conn.query(sql, [id]);
+      const result = await conn.query(sql);
       conn.release();
       return result.rows[0];
     } catch (err) {
-      throw new Error(`Couldn't SHOW user: ${id}. Error: ${err}`);
+      throw new Error(`Couldn't SHOW user: ${user_id}. Error: ${err}`);
     }
   }
   async create(U: User): Promise<User> {
@@ -50,7 +50,7 @@ class Users {
       VALUES ('${U.email}', '${U.first_name}', '${U.last_name}','${hashPass(
         U.password
       )}') 
-      RETURNING id, email, first_name, last_name`;
+      RETURNING user_id, email, first_name, last_name`;
       const conn = await Client.connect();
 
       const result = await conn.query(sql);
@@ -62,7 +62,7 @@ class Users {
       );
     }
   }
-  async update(id: string, U: User): Promise<User> {
+  async update(user_id: string, U: User): Promise<User> {
     try {
       let sets: string = "";
       if (U.email) {
@@ -97,25 +97,25 @@ class Users {
       if (!sets) throw new Error("Please provide data to update");
 
       // Change provided values only
-      const sql = `UPDATE users SET ${sets} WHERE id='${id}' 
-      RETURNING id, email, first_name, last_name;`;
+      const sql = `UPDATE users SET ${sets} WHERE user_id='${user_id}' 
+      RETURNING user_id, email, first_name, last_name;`;
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
       return result.rows[0];
     } catch (err) {
-      throw new Error(`Couldn't UPDATE user: ${id}. Error: ${err}`);
+      throw new Error(`Couldn't UPDATE user: ${user_id}. Error: ${err}`);
     }
   }
-  async delete(id: string): Promise<User> {
+  async delete(user_id: string): Promise<User> {
     try {
-      const sql = `DELETE FROM users WHERE id=($1) RETURNING id, email, first_name, last_name`;
+      const sql = `DELETE FROM users WHERE user_id='${user_id}' RETURNING id, email, first_name, last_name`;
       const conn = await Client.connect();
-      const result = await conn.query(sql, [id]);
+      const result = await conn.query(sql);
       conn.release();
       return result.rows[0];
     } catch (err) {
-      throw new Error(`Couldn't DELETE User: ${id}. Error: ${err}`);
+      throw new Error(`Couldn't DELETE User: ${user_id}. Error: ${err}`);
     }
   }
   async login(email: string, password: string): Promise<User | "invalid"> {
@@ -131,7 +131,7 @@ class Users {
         if (
           bcrypt.compareSync(`${password}${process.env.PEPPER}`, `${element}`)
         ) {
-          const sql = `SELECT id, email, first_name, last_name FROM users WHERE email='${email}'
+          const sql = `SELECT user_id, email, first_name, last_name FROM users WHERE email='${email}'
             AND password='${element}';`;
           const result_ = await conn.query(sql);
           conn.release();
@@ -146,7 +146,8 @@ class Users {
   }
   async auth(U: User): Promise<User | "invalid"> {
     try {
-      const sql = `SELECT id, email, first_name, last_name FROM users WHERE email='${U.email}' AND first_name='${U.first_name}'`;
+      const sql = `SELECT user_id, email, first_name, last_name FROM users 
+      WHERE email='${U.email}' AND first_name='${U.first_name}' AND last_name='${U.last_name}'`;
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
