@@ -21,7 +21,7 @@ const user_3: User = {
   password: "password123",
 };
 
-fdescribe("Test Users model CRUD operations", () => {
+describe("Test Users model CRUD operations", () => {
   it("Shoud create a user", async () => {
     const result = await store.create(user_1);
     user_3.user_id = (await store.create(user_3)).user_id;

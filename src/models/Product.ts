@@ -1,9 +1,9 @@
 import Client from "../db/connect";
 
 interface Product {
-  id?: string;
+  product_id?: string;
   name: string;
-  price: string;
+  price: number;
 }
 
 class Products {
@@ -18,15 +18,15 @@ class Products {
       throw new Error(`Couldn't INDEX all the products. Error: ${err}`);
     }
   }
-  async getOne(id: string): Promise<Product> {
+  async getOne(product_id: string): Promise<Product> {
     try {
-      const sql = `SELECT * FROM products WHERE id=($1)`;
+      const sql = `SELECT * FROM products WHERE product_id=($1)`;
       const conn = await Client.connect();
-      const result = await conn.query(sql, [id]);
+      const result = await conn.query(sql, [product_id]);
       conn.release();
       return result.rows[0];
     } catch (err) {
-      throw new Error(`Couldn't SHOW product: ${id}. Error: ${err}`);
+      throw new Error(`Couldn't SHOW product: ${product_id}. Error: ${err}`);
     }
   }
   async create(P: Product): Promise<Product> {
@@ -44,7 +44,7 @@ class Products {
       throw new Error(`Couldn't CREATE product: ${P.name}. Error: ${err}`);
     }
   }
-  async update(id: string, P: Product): Promise<Product> {
+  async update(product_id: string, P: Product): Promise<Product> {
     try {
       let sets: string = "";
       if (P.name) {
@@ -64,24 +64,24 @@ class Products {
 
       if (!sets) throw new Error("Please provide data to update");
       // Change provided values only
-      const sql = `UPDATE users SET ${sets} WHERE id='$1' RETURNING *`;
+      const sql = `UPDATE products SET ${sets} WHERE product_id=($1) RETURNING *`;
       const conn = await Client.connect();
-      const result = await conn.query(sql, [id]);
+      const result = await conn.query(sql, [product_id]);
       conn.release();
       return result.rows[0];
     } catch (err) {
-      throw new Error(`Couldn't UPDATE product: ${id}. Error: ${err}`);
+      throw new Error(`Couldn't UPDATE product: ${product_id}. Error: ${err}`);
     }
   }
-  async delete(id: string): Promise<Product> {
+  async delete(product_id: string): Promise<Product> {
     try {
-      const sql = `DELETE FROM products WHERE id=($1) RETURNING *`;
+      const sql = `DELETE FROM products WHERE product_id=($1) RETURNING *`;
       const conn = await Client.connect();
-      const result = await conn.query(sql, [id]);
+      const result = await conn.query(sql, [product_id]);
       conn.release();
       return result.rows[0];
     } catch (err) {
-      throw new Error(`Couldn't DELETE product: ${id}. Error: ${err}`);
+      throw new Error(`Couldn't DELETE product: ${product_id}. Error: ${err}`);
     }
   }
 }
