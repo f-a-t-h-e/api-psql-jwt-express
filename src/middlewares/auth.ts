@@ -20,6 +20,9 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
   if (user === "invalid") {
     throw new Error("Access invalid.");
   }
+  // this is for security
+  // @ts-ignore
+  if (req.user) req.user = {};
   // @ts-ignore
   req.user = user;
 
