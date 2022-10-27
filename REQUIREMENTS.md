@@ -1,5 +1,7 @@
 ## API Endpoints
-
+- All routes data are accessed from res.body.data
+- Login and Register don't send res.body.data but res.body.user
+- [POST] /register & [Patch] /api/v1/users/:id & [POST] /login are the only routes that will give/update tokens
 #### Products
 
 - Index [GET] /api/v1/products
@@ -14,9 +16,10 @@
 
 - Index [token required] [GET] /api/v1/users
 - Show [token required] [GET] /api/v1/users/:id
-- Create N[token required] [POST] /api/v1/users
+- Create N[token required] [POST] /register
   [- Update [token required] [Patch] /api/v1/users/:id
-  ,- Delete [token required] [DELETE] /api/v1/users/:id ]
+  ,- Delete [token required] [DELETE] /api/v1/users/:id
+  ,- Login [POST] /login]
 
 #### Orders
 
