@@ -5,7 +5,7 @@
   "main": "server.ts",
   "scripts": {
     "start": "yarn tsc && db-migrate up -e dev && node dist/server",
-    "test": "set ENV=test&&db-migrate up -e test&& yarn tsc && jasmine && yarn db-migrate down:test",
+    "test": "set ENV=test&&db-migrate up -e test&& yarn tsc && jasmine && db-migrate reset -e test",
     "tsc": "tsc",
     "dev": "db-migrate up -e dev&& set ENV=dev&& nodemon src/server.ts"
   },
