@@ -128,8 +128,6 @@ class Users {
       const result = await conn.query(sql);
       for (let i = 0; i < result.rows.length; i++) {
         const element = result.rows[i].password;
-        console.log(element);
-
         if (
           bcrypt.compareSync(`${password}${process.env.PEPPER}`, `${element}`)
         ) {
