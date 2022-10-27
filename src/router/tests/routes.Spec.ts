@@ -180,8 +180,6 @@ describe("with token", () => {
       order.id = res.body.data.id;
       order.status = res.body.data.status;
       order.user_id = res.body.data.user_id;
-      console.log(order);
-      console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
     });
     it("GET /api/v1/orders/:id get specific order", async () => {
       const res = await request
@@ -189,7 +187,6 @@ describe("with token", () => {
         .auth(token, { type: "bearer" });
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual(order);
-      console.log(res.body.data);
     });
     it("PATCH /api/v1/orders/:id Update order", async () => {
       order.products.push("abc-asd-khj");
