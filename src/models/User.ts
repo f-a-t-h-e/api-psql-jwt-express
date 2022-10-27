@@ -143,16 +143,18 @@ class Users {
       throw new Error(`Couldn't authenticate. Error: ${err}`);
     }
   }
-  async auth(U: User): Promise<User | "invalid"> {
+  async auth(U: User): Promise<User> {
     try {
       const sql = `SELECT user_id, email, first_name, last_name FROM users 
-      WHERE email='${U.email}' AND first_name='${U.first_name}' AND last_name='${U.last_name}'`;
+      WHERE email='${U.email}' AND first_name='${U.first_name}' AND last_name='${U.last_name}';`;
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
+      console.log(sql);
+      console.log(result.rows);
 
       if (!result.rows[0]) {
-        return "invalid";
+        throw new Error("Invalid");
       }
       return result.rows[0];
     } catch (err) {

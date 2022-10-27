@@ -21,7 +21,7 @@ const user_3: User = {
   password: "password123",
 };
 
-describe("Test Users model CRUD operations", () => {
+fdescribe("Test Users model CRUD operations", () => {
   it("Shoud create a user", async () => {
     const result = await store.create(user_1);
     user_3.user_id = (await store.create(user_3)).user_id;
@@ -43,6 +43,10 @@ describe("Test Users model CRUD operations", () => {
     const result = await store.getAll();
     expect(result.length).toBeGreaterThan(1);
     expect(result[0].email).toBeTruthy();
+  });
+  it("Should authorize", async () => {
+    const right = await store.auth(user_2);
+    expect(right.user_id).toBe(user_1.user_id);
   });
   it("should delete user", async () => {
     await store.delete(user_1.user_id as string);

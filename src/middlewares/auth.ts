@@ -16,10 +16,6 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
   const U = jwt.verify(token, process.env.JWT_SECRET as string) as User;
 
   const user = await store.auth(U);
-
-  if (user === "invalid") {
-    throw new Error("Access invalid.");
-  }
   // this is for security
   // @ts-ignore
   if (req.user) req.user = {};
