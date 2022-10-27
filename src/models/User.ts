@@ -30,7 +30,7 @@ class Users {
   }
   async getOne(user_id: string): Promise<User> {
     try {
-      const sql = `SELECT user_id, email, first_name, last_name FROM users WHERE id='${user_id}'`;
+      const sql = `SELECT user_id, email, first_name, last_name FROM users WHERE user_id='${user_id}'`;
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
@@ -52,7 +52,6 @@ class Users {
       )}') 
       RETURNING user_id, email, first_name, last_name`;
       const conn = await Client.connect();
-
       const result = await conn.query(sql);
       conn.release();
       return result.rows[0];
@@ -109,7 +108,7 @@ class Users {
   }
   async delete(user_id: string): Promise<User> {
     try {
-      const sql = `DELETE FROM users WHERE user_id='${user_id}' RETURNING id, email, first_name, last_name`;
+      const sql = `DELETE FROM users WHERE user_id='${user_id}' RETURNING user_id, email, first_name, last_name`;
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
