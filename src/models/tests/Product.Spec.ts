@@ -24,7 +24,12 @@ const product_5: Product = {
 };
 const products = [product_1, product_2, product_3, product_4, product_5];
 describe("Test Products model CRUD operatins", () => {
-  beforeAll(async () => {});
+  afterAll(async () => {
+    for (let i = 0; i < products.length; i++) {
+      const P = products[i];
+      await store.delete(P.product_id as string);
+    }
+  });
   it("should create products", async () => {
     product_1.product_id = (await store.create(product_1)).product_id;
     product_2.product_id = (await store.create(product_2)).product_id;
@@ -64,6 +69,7 @@ describe("Test Products model CRUD operatins", () => {
     const result = await store.delete(product_1.product_id as string);
     expect(result).toEqual(product_1);
     expect(await store.getAll()).not.toContain(product_1);
+    await store.create(product_1);
   });
   //   it("should create products", async () => {});
 });

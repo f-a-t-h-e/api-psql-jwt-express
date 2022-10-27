@@ -150,8 +150,6 @@ class Users {
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
-      console.log(sql);
-      console.log(result.rows);
 
       if (!result.rows[0]) {
         throw new Error("Invalid");
