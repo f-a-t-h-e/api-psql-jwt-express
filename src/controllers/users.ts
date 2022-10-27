@@ -31,7 +31,7 @@ const update = async (
   // @ts-ignore
   const { user } = req;
 
-  const data = await store.update(user.id, req.body);
+  const data = await store.update(user.user_id, req.body);
   const token = jwt.sign(data, process.env.JWT_SECRET as string);
 
   res.status(201).json({ data, token });
@@ -43,7 +43,7 @@ const Delete = async (
 ): Promise<void> => {
   // @ts-ignore
   const { user } = req;
-  const data = await store.delete(user.id);
+  const data = await store.delete(user.user_id);
   res.status(200).json({ data });
 };
 
