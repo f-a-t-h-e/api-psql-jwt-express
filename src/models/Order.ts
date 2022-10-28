@@ -1,19 +1,20 @@
 import Client from "../db/connect";
 
 interface Order {
-  id?: string;
-  products: string[];
-  quantity: string[];
+  order_id?: string;
   user_id?: string;
+  products?: string[];
+  quantity?: number[];
   status?: "active" | "complete";
+  date?: Date;
 }
 
 class Orders {
-  async getAll(user_id: string): Promise<Order[]> {
+  async getComplete(user_id: string): Promise<Order[]> {
     try {
-      const sql = `SELECT * FROM orders WHERE user_id=($1)`;
+      const sql = `SELECT * FROM orders WHERE user_id='${user_id}' AND status='complete'`;
       const conn = await Client.connect();
-      const result = await conn.query(sql, [user_id]);
+      const result = await conn.query(sql);
       conn.release();
       return result.rows;
     } catch (err) {
@@ -22,32 +23,28 @@ class Orders {
       );
     }
   }
-  async getOne(id: string, user_id: string): Promise<Order> {
+  async getCurrent(user_id: string): Promise<Order> {
     try {
-      const sql = `SELECT * FROM orders WHERE id=($1) AND user_id=($2)`;
+      const sql = `SELECT * FROM orders WHERE user_id='${user_id}' AND status='active'`;
       const conn = await Client.connect();
-      const result = await conn.query(sql, [id, user_id]);
+      const result = await conn.query(sql);
       conn.release();
-      return result.rows[0];
+      return result.rows[0]; // ATTENTION : CHECK IF IT NEEDS FIX FROM rows[0] to rows TO AVOID POTENTIAL ERRORS
     } catch (err) {
       throw new Error(
-        `Couldn't SHOW order: ${id} for user: ${user_id}. Error: ${err}`
+        `There is no current order for user: ${user_id}. Error: ${err}`
       );
     }
   }
 
-  async create(O: Order, user_id: string): Promise<Order> {
+  async create(user_id: string, O: Order): Promise<Order> {
     try {
-      if (!O.products || !O.quantity || !user_id) {
-        throw new Error("Please Provide products, quantity, user_id.");
+      if (!user_id) {
+        throw new Error("Please Provide user_id.");
       }
 
-      const sql = `INSERT INTO orders (products, quantity, user_id, status) VALUES ('{${
-        O.products
-      }}', '{${O.quantity}}', '${user_id}', '${
-        O.status === "complete" ? "complete" : "active"
-      }' ) RETURNING *`;
-
+      const sql = `INSERT INTO orders (user_id, status)
+       VALUES ('${user_id}', 'active') RETURNING *`;
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
@@ -60,7 +57,7 @@ class Orders {
     }
   }
 
-  async update(id: string, O: Order, user_id: string): Promise<Order> {
+  async update(user_id: string, order_id: string, O: Order): Promise<Order> {
     try {
       let sets: string = "";
       if (O.products) {
@@ -69,46 +66,67 @@ class Orders {
         } else {
           sets += `, products='{${O.products}}'`;
         }
-      }
-      if (O.quantity) {
+        if (!O.quantity || O.quantity.length !== O.products.length) {
+          throw new Error(
+            "You Can't edit products without providing the quantity of each product"
+          );
+        }
         if (!sets) {
           sets += `quantity='{${O.quantity}}'`;
         } else {
           sets += `, quantity='{${O.quantity}}'`;
         }
       }
-      if (O.status === "active" || O.status === "complete") {
-        if (!sets) {
-          sets += `status='${O.status}'`;
-        } else {
-          sets += `, status='${O.status}'`;
-        }
-      }
 
       if (!sets) throw new Error("Please provide data to update");
       // Change provided values only
-      const sql = `UPDATE orders SET ${sets} WHERE id='${id}' AND user_id='${user_id}' RETURNING *`;
+      const sql = `UPDATE orders SET ${sets}
+       WHERE order_id='${order_id}' AND user_id='${user_id}' AND status='active'
+       RETURNING *`;
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
+      if (!result.rows) {
+        throw new Error(
+          `This order:${order_id} is not active for this user:${user_id}`
+        );
+      }
       return result.rows[0];
     } catch (err) {
       throw new Error(
-        `Couldn't UPDATE Order: ${id} For user: ${user_id}. Error: ${err}`
+        `Couldn't UPDATE Order: ${order_id} For user: ${user_id}. Error: ${err}`
+      );
+    }
+  }
+  async complete(user_id: string, order_id: string) {
+    try {
+      const sql = `UPDATE orders SET status='complete' 
+      WHERE order_id='${order_id}' AND user_id='${user_id}' AND status='active'
+      RETURNING *`;
+      const conn = await Client.connect();
+      const result = await conn.query(sql);
+      conn.release();
+      if (!result.rows) {
+        throw new Error("This order is not active or doesn't exist.");
+      }
+      return result.rows[0];
+    } catch (err) {
+      throw new Error(
+        `Couldn't complete this order: (${order_id}) for user: (${user_id})`
       );
     }
   }
 
-  async delete(id: string, user_id: string): Promise<Order> {
+  async delete(user_id: string, order_id: string): Promise<Order> {
     try {
-      const sql = `DELETE FROM orders WHERE id=($1) AND user_id=($2) RETURNING *`;
+      const sql = `DELETE FROM orders WHERE order_id=($1) AND user_id=($2) RETURNING *`;
       const conn = await Client.connect();
-      const result = await conn.query(sql, [id, user_id]);
+      const result = await conn.query(sql, [order_id, user_id]);
       conn.release();
       return result.rows[0];
     } catch (err) {
       throw new Error(
-        `Couldn't DELETE order: ${id} For user: ${user_id}. Error: ${err}`
+        `Couldn't DELETE order: ${order_id} For user: ${user_id}. Error: ${err}`
       );
     }
   }

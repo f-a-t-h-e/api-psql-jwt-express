@@ -19,7 +19,7 @@ const order_5: Order = {};
 
 const orders: Order[] = [order_1, order_2, order_3, order_4, order_5];
 
-describe("Test Orders model CRUD operations", () => {
+fdescribe("Test Orders model CRUD operations", () => {
   // CREATE TEST ROWS
   beforeAll(async () => {
     users[0].user_id = (await userStore.create(users[0])).user_id;
@@ -42,16 +42,16 @@ describe("Test Orders model CRUD operations", () => {
     ).product_id;
   });
   // DELETE TEST ROWS
-  afterAll(async () => {
-    await userStore.delete(users[0].user_id as string);
-    await userStore.delete(users[1].user_id as string);
-    await userStore.delete(users[2].user_id as string);
-    await productStore.delete(products[0].product_id as string);
-    await productStore.delete(products[1].product_id as string);
-    await productStore.delete(products[2].product_id as string);
-    await productStore.delete(products[3].product_id as string);
-    await productStore.delete(products[4].product_id as string);
-  });
+  // afterAll(async () => {
+  //   await userStore.delete(users[0].user_id as string);
+  //   await userStore.delete(users[1].user_id as string);
+  //   await userStore.delete(users[2].user_id as string);
+  //   await productStore.delete(products[0].product_id as string);
+  //   await productStore.delete(products[1].product_id as string);
+  //   await productStore.delete(products[2].product_id as string);
+  //   await productStore.delete(products[3].product_id as string);
+  //   await productStore.delete(products[4].product_id as string);
+  // });
   it("should create orders", async () => {
     const result = await orderStore.create(users[0].user_id as string, order_1);
     expect(result.user_id).toBe(users[0].user_id);

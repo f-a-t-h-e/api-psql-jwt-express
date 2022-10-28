@@ -20,7 +20,7 @@ const user_3: User = {
   last_name: "osama",
   password: "password123",
 };
-
+const users: User[] = [user_1, user_2, user_3];
 describe("Test Users model CRUD operations", () => {
   it("Shoud create a user", async () => {
     const result = await store.create(user_1);
@@ -55,3 +55,5 @@ describe("Test Users model CRUD operations", () => {
     expect(result.first_name).toBe(user_3.first_name);
   });
 });
+
+export { users };

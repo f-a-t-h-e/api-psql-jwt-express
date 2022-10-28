@@ -73,3 +73,5 @@ describe("Test Products model CRUD operatins", () => {
   });
   //   it("should create products", async () => {});
 });
+
+export { products };
