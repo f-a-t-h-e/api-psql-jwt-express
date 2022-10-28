@@ -1,8 +1,11 @@
+import { getOne } from "../controllers/products";
 import Client from "../db/connect";
+import generateSQL, { Options, Values } from "./format/genSQL";
 
 interface Order {
   order_id?: string;
   user_id?: string;
+  bills?: string[];
   products?: string[];
   quantity?: number[];
   status?: "active" | "complete";
@@ -10,9 +13,16 @@ interface Order {
 }
 
 class Orders {
+  // DONE
   async getComplete(user_id: string): Promise<Order[]> {
     try {
-      const sql = `SELECT * FROM orders WHERE user_id='${user_id}' AND status='complete'`;
+      const options: Options = {
+        table: "order",
+        command: "SELECT",
+        user_id,
+        condition: "complete",
+      };
+      const sql = generateSQL(options);
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
@@ -23,9 +33,18 @@ class Orders {
       );
     }
   }
-  async getCurrent(user_id: string): Promise<Order> {
+  // DONE WITH A NOTE
+  async getOne(user_id: string, order_id: string = ""): Promise<Order> {
     try {
-      const sql = `SELECT * FROM orders WHERE user_id='${user_id}' AND status='active'`;
+      const options: Options = {
+        table: "order",
+        command: "SELECT",
+        user_id,
+        input_id: order_id,
+      };
+      if (!order_id) options.condition = "active";
+
+      const sql = generateSQL(options);
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
@@ -36,15 +55,26 @@ class Orders {
       );
     }
   }
-
-  async create(user_id: string, O: Order): Promise<Order> {
+  // DONE
+  async create(O: Order): Promise<Order> {
     try {
+      const { user_id, status } = O;
       if (!user_id) {
-        throw new Error("Please Provide user_id.");
+        throw new Error("Please Login to add orders.");
       }
+      const values: Values = [user_id];
 
-      const sql = `INSERT INTO orders (user_id, status)
-       VALUES ('${user_id}', 'active') RETURNING *`;
+      if (status) {
+        values.push(status);
+      } else {
+        values.push("active");
+      }
+      const options: Options = {
+        table: "order",
+        command: "INSERT INTO",
+        values,
+      };
+      const sql = generateSQL(options);
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
@@ -52,37 +82,71 @@ class Orders {
       return result.rows[0];
     } catch (err) {
       throw new Error(
-        `Couldn't CREATE an order For user: ${user_id}. Error: ${err}`
+        `Couldn't CREATE an order For user: ${O.user_id}. Error: ${err}`
       );
     }
   }
-
-  async update(user_id: string, order_id: string, O: Order): Promise<Order> {
+  // DONE
+  async update(O: Order): Promise<Order> {
     try {
-      let sets: string = "";
-      if (O.products) {
-        if (!sets) {
-          sets += `products='{${O.products}}'`;
-        } else {
-          sets += `, products='{${O.products}}'`;
+      let sql: string = ``;
+      const { order_id, user_id, status, products, quantity } = O;
+      const old_O: Order = await this.getOne(user_id as string, order_id);
+      const condition_0 =
+        products && quantity && products.length === quantity.length;
+      const condition_1 = old_O.products?.length === products?.length;
+      if (condition_0 && old_O.bills && old_O.products && !condition_1) {
+        const options: Options = {
+          table: "bill",
+          command: "DELETE",
+          user_id: user_id,
+          input_id: order_id,
+        };
+        sql += `${generateSQL(options)};
+        `;
+      }
+      if (condition_0) {
+        for (let i = 0; i < products.length; i++) {
+          const product_id = products[i];
+          const quantity_num = quantity[i];
+          const values: Values = [
+            user_id,
+            order_id,
+            product_id,
+            quantity_num,
+          ] as string[];
+          const options: Options = {
+            table: "bill",
+            command: "INSERT INTO",
+            values,
+          };
+          sql += `${generateSQL(options)};
+            `;
         }
-        if (!O.quantity || O.quantity.length !== O.products.length) {
-          throw new Error(
-            "You Can't edit products without providing the quantity of each product"
-          );
-        }
-        if (!sets) {
-          sets += `quantity='{${O.quantity}}'`;
-        } else {
-          sets += `, quantity='{${O.quantity}}'`;
+      } else if (condition_1 && condition_0 && old_O.bills) {
+        for (let i = 0; i < products.length; i++) {
+          const product_id = products[i];
+          const quantity_num = quantity[i];
+          const values: Values = [
+            `product_id='${product_id}'`,
+            `quantity='${quantity_num}'`,
+          ];
+          const bill_id = old_O.bills[i];
+          const options: Options = {
+            table: "bill",
+            command: "UPDATE",
+            values,
+            user_id,
+            input_id: bill_id,
+          };
+          sql += `${generateSQL(options)};
+          `;
         }
       }
+      if (sql === "") {
+        return old_O;
+      }
 
-      if (!sets) throw new Error("Please provide data to update");
-      // Change provided values only
-      const sql = `UPDATE orders SET ${sets}
-       WHERE order_id='${order_id}' AND user_id='${user_id}' AND status='active'
-       RETURNING *`;
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
@@ -94,15 +158,20 @@ class Orders {
       return result.rows[0];
     } catch (err) {
       throw new Error(
-        `Couldn't UPDATE Order: ${order_id} For user: ${user_id}. Error: ${err}`
+        `Couldn't UPDATE Order: ${O.order_id} For user: ${O.user_id}. Error: ${err}`
       );
     }
   }
+  // DONE
   async complete(user_id: string, order_id: string) {
     try {
-      const sql = `UPDATE orders SET status='complete' 
-      WHERE order_id='${order_id}' AND user_id='${user_id}' AND status='active'
-      RETURNING *`;
+      const options: Options = {
+        table: "order",
+        command: "UPDATE",
+        user_id,
+        input_id: order_id,
+      };
+      const sql = generateSQL(options);
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
@@ -116,12 +185,18 @@ class Orders {
       );
     }
   }
-
+  // DONE
   async delete(user_id: string, order_id: string): Promise<Order> {
     try {
-      const sql = `DELETE FROM orders WHERE order_id=($1) AND user_id=($2) RETURNING *`;
+      const options: Options = {
+        table: "order",
+        command: "SELECT",
+        user_id,
+        input_id: order_id,
+      };
+      const sql = generateSQL(options);
       const conn = await Client.connect();
-      const result = await conn.query(sql, [order_id, user_id]);
+      const result = await conn.query(sql);
       conn.release();
       return result.rows[0];
     } catch (err) {
