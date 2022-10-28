@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import Client from "../db/connect";
 import bcrypt from "bcrypt";
+import generateSQL, { Options } from "./format/genSQL";
 interface User {
   user_id?: string;
   email: string;
@@ -16,9 +17,14 @@ const hashPass = (pass: string): string => {
 };
 
 class Users {
+  // DONE
   async getAll(): Promise<User[]> {
     try {
-      const sql = `SELECT user_id, email, first_name, last_name FROM Users;`;
+      const options: Options = {
+        table: "user",
+        command: "SELECT",
+      };
+      const sql = generateSQL(options);
       const conn = await Client.connect();
       const result = await conn.query(sql);
 
@@ -28,9 +34,15 @@ class Users {
       throw new Error(`Couldn't INDEX any Users. Error: ${err}`);
     }
   }
+  // DONE
   async getOne(user_id: string): Promise<User> {
     try {
-      const sql = `SELECT user_id, email, first_name, last_name FROM users WHERE user_id='${user_id}'`;
+      const options: Options = {
+        table: "user",
+        command: "SELECT",
+        input_id: user_id,
+      };
+      const sql = generateSQL(options);
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
@@ -39,18 +51,21 @@ class Users {
       throw new Error(`Couldn't SHOW user: ${user_id}. Error: ${err}`);
     }
   }
+  // DONE
   async create(U: User): Promise<User> {
     try {
-      if (!U.email || !U.first_name || !U.last_name || !U.password) {
+      const { email, first_name, last_name, password } = U;
+      if (!email || !first_name || !last_name || !password) {
         throw new Error(
           "Please Provide email, first_name, last_name and password"
         );
       }
-      const sql = `INSERT INTO users (email, first_name, last_name, password) 
-      VALUES ('${U.email}', '${U.first_name}', '${U.last_name}','${hashPass(
-        U.password
-      )}') 
-      RETURNING user_id, email, first_name, last_name`;
+      const options: Options = {
+        table: "user",
+        command: "INSERT INTO",
+        values: [email, first_name, last_name, hashPass(password)],
+      };
+      const sql = generateSQL(options);
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
@@ -61,43 +76,22 @@ class Users {
       );
     }
   }
+  // DONE
   async update(user_id: string, U: User): Promise<User> {
     try {
-      let sets: string = "";
-      if (U.email) {
-        if (!sets) {
-          sets += `email='${U.email}'`;
-        } else {
-          sets += `, email='${U.email}'`;
-        }
-      }
-      if (U.first_name) {
-        if (!sets) {
-          sets += `first_name='${U.first_name}'`;
-        } else {
-          sets += `, first_name='${U.first_name}'`;
-        }
-      }
-      if (U.last_name) {
-        if (!sets) {
-          sets += `last_name='${U.last_name}'`;
-        } else {
-          sets += `, last_name='${U.last_name}'`;
-        }
-      }
-      if (U.password) {
-        if (!sets) {
-          sets += `password='${hashPass(U.password)}'`;
-        } else {
-          sets += `, password='${hashPass(U.password)}'`;
-        }
-      }
-
-      if (!sets) throw new Error("Please provide data to update");
-
-      // Change provided values only
-      const sql = `UPDATE users SET ${sets} WHERE user_id='${user_id}' 
-      RETURNING user_id, email, first_name, last_name;`;
+      const { email, first_name, last_name, password } = U;
+      const values: string[] = [];
+      if (email) values.push(`email='${email}'`);
+      if (first_name) values.push(`first_name='${first_name}'`);
+      if (last_name) values.push(`last_name='${last_name}'`);
+      if (password) values.push(`password='${hashPass(password)}'`);
+      const options: Options = {
+        table: "user",
+        command: "UPDATE",
+        values,
+        user_id,
+      };
+      const sql = generateSQL(options);
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
@@ -106,9 +100,15 @@ class Users {
       throw new Error(`Couldn't UPDATE user: ${user_id}. Error: ${err}`);
     }
   }
+  // DONE
   async delete(user_id: string): Promise<User> {
     try {
-      const sql = `DELETE FROM users WHERE user_id='${user_id}' RETURNING user_id, email, first_name, last_name`;
+      const options: Options = {
+        table: "user",
+        command: "DELETE",
+        user_id,
+      };
+      const sql = generateSQL(options);
       const conn = await Client.connect();
       const result = await conn.query(sql);
       conn.release();
@@ -117,7 +117,7 @@ class Users {
       throw new Error(`Couldn't DELETE User: ${user_id}. Error: ${err}`);
     }
   }
-  async login(email: string, password: string): Promise<User | "invalid"> {
+  async login(email: string, password: string): Promise<User | ""> {
     try {
       if (!email || !password) {
         throw new Error("Please provide email and password");
@@ -138,7 +138,7 @@ class Users {
         }
       }
       conn.release();
-      return "invalid";
+      return "";
     } catch (err) {
       throw new Error(`Couldn't authenticate. Error: ${err}`);
     }
