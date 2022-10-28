@@ -33,7 +33,7 @@ const generateSQL = (options: Options): string | "" => {
       return `${command} * FROM ${table}${condition}`;
     }
     // REMINDER : use .slice(0, 5) FOR 5 most recent purchases
-    // bills: num of bills, product_id[], quantity[], order_id, user_id, status, date
+    // bill_id[], product_id[], quantity[], order_id, user_id, status, date
     // DONE
     if (table === "order") {
       // TO SELECT orders FOR CURRENT USER PASS THEIR condition
@@ -41,7 +41,7 @@ const generateSQL = (options: Options): string | "" => {
         ? ` AND o.status='${condition}' `
         : ` AND o.order_id='${input_id}' `;
       return `
-      SELECT COUNT(b.bill_id) AS bills, 
+      SELECT ARRAY_AGG(b.bill_id ORDER BY b.date ASC) AS bills, 
       ARRAY_AGG(b.product_id ORDER BY b.date ASC) AS products ,
       ARRAY_AGG(b.quantity ORDER BY b.date ASC) AS quantity,
       o.order_id,
