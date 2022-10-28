@@ -1,17 +1,20 @@
-const generateSQL = (
-  command: "SELECT" | "INSERT INTO" | "UPDATE" | "DELETE" = "SELECT",
-  table: "user" | "product" | "order" | "bill",
-  user_id: string = "",
-  values: string[] = [],
-  input_id: string = "",
-  condition: string = ""
-): string | "" => {
-  let sql: string = ``;
+type Values = (string | number)[];
+interface Options {
+  table: "user" | "product" | "order" | "bill";
+  command: "SELECT" | "INSERT INTO" | "UPDATE" | "DELETE";
+  user_id?: string;
+  values?: Values;
+  input_id?: string;
+  condition?: string | "complete" | "active";
+}
+
+const generateSQL = (options: Options): string | "" => {
+  let { table, command, user_id, values, input_id, condition } = options;
   // DONE
   if (command === "SELECT") {
     if (table === "user") {
-      if (condition) condition = ` WHERE ${condition}`;
-      return `${command} * FROM ${table}${condition}`;
+      if (input_id) input_id = ` WHERE ${table}_id=${input_id}`;
+      return `${command} * FROM ${table}${input_id}`;
     }
     // DONE
     if (table === "product") {
@@ -33,6 +36,7 @@ const generateSQL = (
     // bills: num of bills, product_id[], quantity[], order_id, user_id, status, date
     // DONE
     if (table === "order") {
+      // TO SELECT orders FOR CURRENT USER PASS THEIR condition
       condition = condition
         ? ` AND o.status='${condition}' `
         : ` AND o.order_id='${input_id}' `;
@@ -60,7 +64,7 @@ const generateSQL = (
   // DONE
   if (command === "INSERT INTO") {
     return `${command} ${table}s
-      VALUES (DEFAULT,${values.map((v) => `'${v}'`)}) 
+      VALUES (DEFAULT,${values?.map((v) => `'${v}'`)},DEFAULT) 
       RETURNING *`;
   }
   if (command === "UPDATE") {
@@ -82,9 +86,13 @@ const generateSQL = (
   }
   // DONE
   if (command === "DELETE") {
+    if (table === "user") {
+      return `${command} FROM ${table}s WHERE ${table}_id='${user_id}' RETURNING *`;
+    }
     return `${command} FROM ${table}s WHERE user_id='${user_id}' AND ${table}_id='${input_id}' RETURNING *`;
   }
-  return sql;
+  return "";
 };
 
 export default generateSQL;
+export { Options, Values };
