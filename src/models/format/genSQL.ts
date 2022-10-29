@@ -13,8 +13,10 @@ const generateSQL = (options: Options): string | "" => {
   // DONE
   if (command === "SELECT") {
     if (table === "user") {
-      if (input_id) input_id = ` WHERE ${table}_id=${input_id}`;
-      return `${command} * FROM ${table}${input_id}`;
+      if (input_id) {
+        input_id = ` WHERE ${table}_id='${input_id}'`;
+      }
+      return `${command} * FROM ${table}s${input_id ? input_id : ""}`;
     }
     // DONE
     if (table === "product") {
@@ -30,13 +32,14 @@ const generateSQL = (options: Options): string | "" => {
         ORDER BY COUNT(bill_id) DESC
         ${condition}`;
       }
-      return `${command} * FROM ${table}${condition}`;
+      return `${command} * FROM ${table}s`;
     }
     // REMINDER : use .slice(0, 5) FOR 5 most recent purchases
     // bill_id[], product_id[], quantity[], order_id, user_id, status, date
     // DONE
     if (table === "order") {
       // TO SELECT orders FOR CURRENT USER PASS THEIR condition
+      condition = condition ? condition : "active";
       condition = condition
         ? ` AND o.status='${condition}' `
         : ` AND o.order_id='${input_id}' `;
@@ -48,7 +51,7 @@ const generateSQL = (options: Options): string | "" => {
       o.user_id,
       o.status
       FROM orders AS o 
-       JOIN  bills AS b ON o.order_id = b.order_id
+       LEFT JOIN  bills AS b ON o.order_id = b.order_id
      JOIN users u
      ON o.user_id = u.user_id
      WHERE u.user_id = '${user_id}'
@@ -72,7 +75,7 @@ const generateSQL = (options: Options): string | "" => {
       return `${command} ${table}s SET ${values} WHERE ${table}_id='${user_id}' RETURNING *`;
     }
     if (table === "product") {
-      `${command} ${table}s SET ${values} WHERE user_id='${user_id}' AND ${table}_id='${input_id}' RETURNING *`;
+      return `${command} ${table}s SET ${values} WHERE user_id='${user_id}' AND ${table}_id='${input_id}' RETURNING *`;
     }
     if (table === "order") {
       return `${command} ${table}s SET status='complete'
@@ -82,7 +85,7 @@ const generateSQL = (options: Options): string | "" => {
     }
 
     return `${command} ${table}s SET ${values} 
-    WHERE user_id='${user_id}' AND ${table}_id='${input_id}'`;
+    WHERE user_id='${user_id}' AND ${table}_id='${input_id}' RETURNING *`;
   }
   // DONE
   if (command === "DELETE") {

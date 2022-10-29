@@ -55,9 +55,6 @@ const register = async (req: Request, res: Response): Promise<void> => {
 const login = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
   const user = await store.login(email, password);
-  if (user === "invalid") {
-    throw new Error("Login failed, Wrong email or password");
-  }
   const token = jwt.sign(user, process.env.JWT_SECRET as string);
   res.status(200).json({ user, token });
 };

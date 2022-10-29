@@ -26,18 +26,15 @@ describe("Test Users model CRUD operations", () => {
     const result = await store.create(user_1);
     user_3.user_id = (await store.create(user_3)).user_id;
     expect(result.email).toEqual(user_1.email);
-    expect(result.password).toBeFalsy();
     user_1.user_id = result.user_id;
   });
   it("Shoud update a user", async () => {
     const result = await store.update(`${user_1.user_id}` as string, user_2);
     expect(result.email).toEqual(user_2.email);
-    expect(result.password).toBeFalsy();
   });
   it("should get a user", async () => {
-    const result = await store.getOne(`${user_1.user_id}` as string);
+    const result = await store.getOne(user_1.user_id as string);
     expect(result.email).toBe(user_2.email);
-    expect(result.password).toBeFalsy();
   });
   it("should return all the users in the database", async () => {
     const result = await store.getAll();

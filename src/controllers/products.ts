@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import Products from "../models/Product";
+import Products, { Product } from "../models/Product";
 
 const store = new Products();
 
@@ -16,7 +16,18 @@ const create = async (
   res: Response,
   _next: NextFunction
 ): Promise<void> => {
-  const data = await store.create(req.body);
+  // @ts-ignore
+  const user_id = req.user.user_id;
+  const { name, price, catagory } = req.body;
+  if (!name || !price || !catagory) {
+    throw new Error("Please provide name, price and catagory.");
+  }
+  const data = await store.create({
+    user_id,
+    name,
+    price,
+    catagory,
+  });
   res.status(201).json({ data });
 };
 const update = async (
@@ -24,7 +35,20 @@ const update = async (
   res: Response,
   _next: NextFunction
 ): Promise<void> => {
-  const data = await store.update(req.params.id, req.body);
+  // @ts-ignore
+  const user_id = req.user.user_id;
+  const { price, name, catagory } = req.body;
+  const product_id = req.params.id;
+  if (!name || !price || !catagory) {
+    throw new Error("Please provide name, price and catagory .");
+  }
+  const data = await store.update({
+    product_id,
+    user_id,
+    name,
+    price,
+    catagory,
+  });
   res.status(200).json({ data });
 };
 const Delete = async (
@@ -32,7 +56,9 @@ const Delete = async (
   res: Response,
   _next: NextFunction
 ): Promise<void> => {
-  const data = await store.delete(req.params.id);
+  // @ts-ignore
+  const user_id = req.user.user_id;
+  const data = await store.delete(user_id, req.params.id);
   res.status(200).json({ data });
 };
 

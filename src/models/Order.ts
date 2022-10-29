@@ -148,6 +148,14 @@ class Orders {
       }
 
       const conn = await Client.connect();
+      await conn.query(sql);
+      const options: Options = {
+        table: "order",
+        command: "SELECT",
+        user_id,
+        input_id: order_id,
+      };
+      sql = generateSQL(options);
       const result = await conn.query(sql);
       conn.release();
       if (!result.rows) {

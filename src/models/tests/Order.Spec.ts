@@ -18,13 +18,18 @@ const order_4: Order = {};
 const order_5: Order = {};
 
 const orders: Order[] = [order_1, order_2, order_3, order_4, order_5];
-
-fdescribe("Test Orders model CRUD operations", () => {
+let user_id: string = "";
+describe("Test Orders model CRUD operations", () => {
   // CREATE TEST ROWS
   beforeAll(async () => {
     users[0].user_id = (await userStore.create(users[0])).user_id;
-    users[1].user_id = (await userStore.create(users[1])).user_id;
-    users[2].user_id = (await userStore.create(users[2])).user_id;
+    user_id = users[0].user_id as string;
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
+      const order = orders[i];
+      product.user_id = user_id;
+      order.user_id = user_id;
+    }
     products[0].product_id = (
       await productStore.create(products[0])
     ).product_id;
@@ -42,27 +47,20 @@ fdescribe("Test Orders model CRUD operations", () => {
     ).product_id;
   });
   // DELETE TEST ROWS
-  // afterAll(async () => {
-  //   await userStore.delete(users[0].user_id as string);
-  //   await userStore.delete(users[1].user_id as string);
-  //   await userStore.delete(users[2].user_id as string);
-  //   await productStore.delete(products[0].product_id as string);
-  //   await productStore.delete(products[1].product_id as string);
-  //   await productStore.delete(products[2].product_id as string);
-  //   await productStore.delete(products[3].product_id as string);
-  //   await productStore.delete(products[4].product_id as string);
-  // });
+  afterAll(async () => {
+    await userStore.delete(users[0].user_id as string);
+  });
   it("should create orders", async () => {
-    const result = await orderStore.create(users[0].user_id as string, order_1);
+    const result = await orderStore.create(order_1);
     expect(result.user_id).toBe(users[0].user_id);
     expect(result.order_id).toBeTruthy();
     expect(result.status).toBe("active");
+
     order_1.order_id = result.order_id;
-    order_1.user_id = result.user_id;
     order_1.status = "active";
   });
   it("should get current order for a user", async () => {
-    const result = await orderStore.getCurrent(order_1.user_id as string);
+    const result = await orderStore.getOne(user_id as string);
     expect(result.status).toBe("active");
     expect(result.user_id).toBe(order_1.user_id);
     expect(result.order_id).toBe(order_1.order_id);
@@ -70,15 +68,9 @@ fdescribe("Test Orders model CRUD operations", () => {
   it("should update orders", async () => {
     order_1.products?.push(products[0].product_id as string);
     order_1.quantity?.push(3);
-    const result_1 = await orderStore.update(
-      order_1.user_id as string,
-      order_1.order_id as string,
-      {
-        products: order_1.products,
-        quantity: [2],
-      }
-    );
-    expect(result_1.products).toEqual(order_1.products);
+    const result = await orderStore.update(order_1);
+
+    expect(result.products).toEqual(order_1.products);
   });
   it("should get Completed orders for current user", async () => {
     const result = await orderStore.getComplete(users[0].user_id as string);
