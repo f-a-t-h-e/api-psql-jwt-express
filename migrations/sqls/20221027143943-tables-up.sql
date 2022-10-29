@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
         first_name VARCHAR NOT NULL,
         last_name VARCHAR NOT NULL,
         password text NOT NULL,
-        date DATETIME NOT NULL DEFAULT now()
+        date TIMESTAMP NOT NULL DEFAULT now()
 
     );
 CREATE TABLE IF NOT EXISTS products (
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS products (
     name VARCHAR NOT NULL,
     price INTEGER DEFAULT 0,
     catagory VARCHAR,
-    date DATETIME NOT NULL DEFAULT now()
+    date TIMESTAMP NOT NULL DEFAULT now()
 
 );
 DROP TYPE IF EXISTS STATUS;
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS orders (
         order_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
         user_id uuid REFERENCES users(user_id) ON DELETE CASCADE,
         status STATUS NOT NULL,
-        date DATETIME NOT NULL DEFAULT now()
+        date TIMESTAMP NOT NULL DEFAULT now()
     );
 CREATE TABLE IF NOT EXISTS bills (
     bill_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -30,5 +30,5 @@ CREATE TABLE IF NOT EXISTS bills (
     order_id uuid REFERENCES orders(order_id) ON DELETE CASCADE,
     product_id uuid REFERENCES products(product_id) ON DELETE CASCADE,
     quantity INTEGER DEFAULT 1,
-    date DATETIME NOT NULL DEFAULT now()
+    date TIMESTAMP NOT NULL DEFAULT now()
 );
