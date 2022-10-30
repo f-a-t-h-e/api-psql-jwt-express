@@ -8,7 +8,7 @@ interface Order {
   bills?: string[];
   products?: string[];
   quantity?: number[];
-  status?: "active" | "complete";
+  status?: false | true; // false:"active" | true:"complete" DEFUALT TO false
   date?: Date;
 }
 
@@ -20,7 +20,7 @@ class Orders {
         table: "order",
         command: "SELECT",
         user_id,
-        condition: "complete",
+        condition: true,
       };
       const sql = generateSQL(options);
       const conn = await Client.connect();
@@ -42,7 +42,7 @@ class Orders {
         user_id,
         input_id: order_id,
       };
-      if (!order_id) options.condition = "active";
+      if (!order_id) options.condition = false;
 
       const sql = generateSQL(options);
       const conn = await Client.connect();
@@ -58,7 +58,7 @@ class Orders {
   // DONE
   async create(user_id: string): Promise<Order> {
     try {
-      const values: Values = [user_id, "active"];
+      const values: Values = [user_id, false];
       const options: Options = {
         table: "order",
         command: "INSERT INTO",

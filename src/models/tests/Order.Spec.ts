@@ -1,6 +1,6 @@
 import Orders, { Order } from "../Order";
-import Products, { Product } from "../Product";
-import Users, { User } from "../User";
+import Products from "../Product";
+import Users from "../User";
 import { products } from "./Product.Spec";
 import { users } from "./User.Spec";
 
@@ -54,14 +54,16 @@ describe("Test Orders model CRUD operations", () => {
     const result = await orderStore.create(user_id);
     expect(result.user_id).toBe(user_id);
     expect(result.order_id).toBeTruthy();
-    expect(result.status).toBe("active");
+    expect(result.status).toBe(false);
 
     order_1.order_id = result.order_id;
-    order_1.status = "active";
+    order_1.status = false;
   });
   it("should get current order for a user", async () => {
+    console.log(user_id);
+
     const result = await orderStore.getOne(user_id as string);
-    expect(result.status).toBe("active");
+    expect(result.status).toBe(false);
     expect(result.user_id).toBe(user_id);
     expect(result.order_id).toBe(order_1.order_id);
   });

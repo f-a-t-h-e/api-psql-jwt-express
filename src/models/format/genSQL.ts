@@ -1,11 +1,11 @@
-type Values = (string | number)[];
+type Values = (string | number | true | false)[];
 interface Options {
   table: "user" | "product" | "order" | "bill";
   command: "SELECT" | "INSERT INTO" | "UPDATE" | "DELETE";
   user_id?: string;
   values?: Values;
   input_id?: string;
-  condition?: number | "complete" | "active";
+  condition?: number | string | false | true;
 }
 
 const generateSQL = (options: Options): string | "" => {
@@ -27,12 +27,16 @@ const generateSQL = (options: Options): string | "" => {
         return `${command} * FROM ${table}s WHERE ${table}_id='${input_id}'`;
       }
       // TOP 5 PRODUCTS
-      if (condition) {
+      if (parseInt(condition as string) === condition) {
         return `SELECT COUNT(bill_id), product_id
         FROM bills
         GROUP BY product_id
         ORDER BY COUNT(bill_id) DESC
         LIMIT ${condition}`;
+      }
+      // BY CATAGORY
+      if (condition) {
+        return `${command} * FROM ${table}s WHERE catagory='${condition}'`;
       }
       return `${command} * FROM ${table}s`;
     }
@@ -41,9 +45,9 @@ const generateSQL = (options: Options): string | "" => {
     // DONE
     if (table === "order") {
       // TO SELECT orders FOR CURRENT USER PASS THEIR condition
-      const con = condition
-        ? ` AND o.status='${condition}' `
-        : ` AND o.order_id='${input_id}' `;
+      const con = input_id
+        ? ` AND o.order_id='${input_id}' `
+        : ` AND o.status=${condition} `;
       return `
       SELECT ARRAY_AGG(b.bill_id ORDER BY b.date ASC) AS bills, 
       ARRAY_AGG(b.product_id ORDER BY b.date ASC) AS products ,
@@ -84,9 +88,9 @@ const generateSQL = (options: Options): string | "" => {
       return `${command} ${table}s SET ${values} WHERE user_id='${user_id}' AND ${table}_id='${input_id}' RETURNING *`;
     }
     if (table === "order") {
-      return `${command} ${table}s SET status='complete'
+      return `${command} ${table}s SET status=true
        WHERE user_id='${user_id}' 
-       AND status='active' 
+       AND status=false 
        AND ${table}_id='${input_id}'`;
     }
 

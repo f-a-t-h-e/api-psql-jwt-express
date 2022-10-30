@@ -3,6 +3,7 @@ import {
   create,
   Delete,
   getAll,
+  getByCat,
   getOne,
   getTop,
   update,
@@ -11,7 +12,8 @@ import auth from "../middlewares/auth";
 const router: Router = Router();
 
 router.route("/").get(getAll).post(auth, create);
-router.route("/top/:num").get(getTop);
 router.route("/:id").get(getOne).patch(auth, update).delete(auth, Delete);
+router.route("/top/:num").get(getTop);
+router.route("/category/:cat").get(getByCat);
 
 export default router;

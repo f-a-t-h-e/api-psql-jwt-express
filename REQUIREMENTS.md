@@ -1,7 +1,9 @@
 ## API Endpoints
+
 - All routes data are accessed from res.body.data
 - Login and Register don't send res.body.data but res.body.user
 - [POST] /register & [Patch] /api/v1/users/:id & [POST] /login are the only routes that will give/update tokens
+
 #### Products
 
 - Index [GET] /api/v1/products
@@ -9,8 +11,8 @@
 - Create [token required] [POST] /api/v1/products
   [- Update [token required] [Patch] /api/v1/products/:id
   ,- Delete [token required] [DELETE] /api/v1/products/:id ]
-- [OPTIONAL] Top 5 most popular products
-- [OPTIONAL] Products by category (args: product category)
+- [OPTIONAL] Top 5 most popular products [GET] /api/v1/products/top/:num # WHERE num is the number of the top products
+- [OPTIONAL] Products by category (args: product category) [GET] /api/v1/products/category/:cat # WHERE cat is the catagory name
 
 #### Users
 
@@ -36,7 +38,7 @@
 - id [string]
 - name [string]
 - price [string]
-- [OPTIONAL] category
+- [OPTIONAL] category [string]
 
 #### User
 
@@ -51,4 +53,4 @@
 - id of each product in the order [string]
 - quantity of each product in the order [string]
 - user_id [string]
-- status of order (active or complete) ["active"|"complete"]
+- status of order (active or complete) [false:"active"|true:"complete"]
