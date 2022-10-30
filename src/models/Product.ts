@@ -26,6 +26,22 @@ class Products {
       throw new Error(`Couldn't INDEX all the products. Error: ${err}`);
     }
   }
+  async getTop(condition: number) {
+    try {
+      const options: Options = {
+        table: "product",
+        command: "SELECT",
+        condition,
+      };
+      const sql = generateSQL(options);
+      const conn = await Client.connect();
+      const result = await conn.query(sql);
+      conn.release();
+      return result.rows;
+    } catch (err) {
+      throw new Error(`Couldn't INDEX all the products. Error: ${err}`);
+    }
+  }
   // DONE
   async getOne(product_id: string): Promise<Product> {
     try {

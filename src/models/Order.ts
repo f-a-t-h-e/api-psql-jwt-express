@@ -56,19 +56,9 @@ class Orders {
     }
   }
   // DONE
-  async create(O: Order): Promise<Order> {
+  async create(user_id: string): Promise<Order> {
     try {
-      const { user_id, status } = O;
-      if (!user_id) {
-        throw new Error("Please Login to add orders.");
-      }
-      const values: Values = [user_id];
-
-      if (status) {
-        values.push(status);
-      } else {
-        values.push("active");
-      }
+      const values: Values = [user_id, "active"];
       const options: Options = {
         table: "order",
         command: "INSERT INTO",
@@ -82,7 +72,7 @@ class Orders {
       return result.rows[0];
     } catch (err) {
       throw new Error(
-        `Couldn't CREATE an order For user: ${O.user_id}. Error: ${err}`
+        `Couldn't CREATE an order For user: ${user_id}. Error: ${err}`
       );
     }
   }
@@ -90,7 +80,7 @@ class Orders {
   async update(O: Order): Promise<Order> {
     try {
       let sql: string = ``;
-      const { order_id, user_id, status, products, quantity } = O;
+      const { order_id, user_id, products, quantity } = O;
       const old_O: Order = await this.getOne(user_id as string, order_id);
       const condition_0 =
         products && quantity && products.length === quantity.length;

@@ -6,7 +6,7 @@ import Orders from "../models/Order";
 import jwt from "jsonwebtoken";
 
 const store = new Users();
-const orderStore = new Orders()
+const orderStore = new Orders();
 
 const getAll = async (
   _req: Request,
@@ -22,9 +22,9 @@ const getOne = async (
   res: Response,
   _next: NextFunction
 ): Promise<void> => {
-const orders = await orderStore.getComplete(req.params.id)
+  const orders = await orderStore.getComplete(req.params.id);
   const user = await store.getOne(req.params.id);
-  res.status(200).json({ data:{user,orders:orders.slice(0,5) });
+  res.status(200).json({ data: { user, orders: orders.slice(0, 5) } });
 };
 const update = async (
   req: Request,

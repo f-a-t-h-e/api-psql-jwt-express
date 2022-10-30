@@ -16,11 +16,9 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
   const U = jwt.verify(token, process.env.JWT_SECRET as string) as User;
 
   const user = await store.auth(U);
-  // this is for security
-  // @ts-ignore
-  if (req.user) req.user = {};
-  // @ts-ignore
-  req.user = user;
+
+  if (req.body.user_id) req.body.user_id = {};
+  req.body.user_id = user.user_id;
 
   next();
 };

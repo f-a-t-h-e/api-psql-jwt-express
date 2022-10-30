@@ -5,7 +5,7 @@ interface Options {
   user_id?: string;
   values?: Values;
   input_id?: string;
-  condition?: string | "complete" | "active";
+  condition?: number | "complete" | "active";
 }
 
 const generateSQL = (options: Options): string | "" => {
@@ -16,7 +16,9 @@ const generateSQL = (options: Options): string | "" => {
       if (input_id) {
         input_id = ` WHERE ${table}_id='${input_id}'`;
       }
-      return `${command} * FROM ${table}s${input_id ? input_id : ""}`;
+      return `${command} user_id, email, first_name, last_name FROM ${table}s${
+        input_id ? input_id : ""
+      }`;
     }
     // DONE
     if (table === "product") {
@@ -30,7 +32,7 @@ const generateSQL = (options: Options): string | "" => {
         FROM bills
         GROUP BY product_id
         ORDER BY COUNT(bill_id) DESC
-        ${condition}`;
+        LIMIT ${condition}`;
       }
       return `${command} * FROM ${table}s`;
     }
@@ -39,8 +41,7 @@ const generateSQL = (options: Options): string | "" => {
     // DONE
     if (table === "order") {
       // TO SELECT orders FOR CURRENT USER PASS THEIR condition
-      condition = condition ? condition : "active";
-      condition = condition
+      const con = condition
         ? ` AND o.status='${condition}' `
         : ` AND o.order_id='${input_id}' `;
       return `
@@ -55,7 +56,7 @@ const generateSQL = (options: Options): string | "" => {
      JOIN users u
      ON o.user_id = u.user_id
      WHERE u.user_id = '${user_id}'
-     ${condition}
+     ${con}
      GROUP BY o.order_id
      ORDER BY o.date
       `;
@@ -66,13 +67,18 @@ const generateSQL = (options: Options): string | "" => {
   }
   // DONE
   if (command === "INSERT INTO") {
+    if (table === "user") {
+      return `${command} ${table}s
+      VALUES (DEFAULT,${values?.map((v) => `'${v}'`)},DEFAULT) 
+      RETURNING user_id, email, first_name, last_name`;
+    }
     return `${command} ${table}s
       VALUES (DEFAULT,${values?.map((v) => `'${v}'`)},DEFAULT) 
       RETURNING *`;
   }
   if (command === "UPDATE") {
     if (table === "user") {
-      return `${command} ${table}s SET ${values} WHERE ${table}_id='${user_id}' RETURNING *`;
+      return `${command} ${table}s SET ${values} WHERE ${table}_id='${user_id}' RETURNING user_id, email, first_name, last_name`;
     }
     if (table === "product") {
       return `${command} ${table}s SET ${values} WHERE user_id='${user_id}' AND ${table}_id='${input_id}' RETURNING *`;
@@ -90,7 +96,7 @@ const generateSQL = (options: Options): string | "" => {
   // DONE
   if (command === "DELETE") {
     if (table === "user") {
-      return `${command} FROM ${table}s WHERE ${table}_id='${user_id}' RETURNING *`;
+      return `${command} FROM ${table}s WHERE ${table}_id='${user_id}' RETURNING user_id, email, first_name, last_name`;
     }
     return `${command} FROM ${table}s WHERE user_id='${user_id}' AND ${table}_id='${input_id}' RETURNING *`;
   }
