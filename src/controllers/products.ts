@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import Products, { Product } from "../models/Product";
+import Products from "../models/Product";
 
 const store = new Products();
 
@@ -20,9 +20,7 @@ const create = async (
   res: Response,
   _next: NextFunction
 ): Promise<void> => {
-  // @ts-ignore
-  const user_id = req.user.user_id;
-  const { name, price, catagory } = req.body;
+  const { name, price, catagory, user_id } = req.body;
   if (!name || !price || !catagory) {
     throw new Error("Please provide name, price and catagory.");
   }
@@ -39,9 +37,7 @@ const update = async (
   res: Response,
   _next: NextFunction
 ): Promise<void> => {
-  // @ts-ignore
-  const user_id = req.user.user_id;
-  const { price, name, catagory } = req.body;
+  const { price, name, catagory, user_id } = req.body;
   const product_id = req.params.id;
   if (!name || !price || !catagory) {
     throw new Error("Please provide name, price and catagory .");
@@ -60,9 +56,7 @@ const Delete = async (
   res: Response,
   _next: NextFunction
 ): Promise<void> => {
-  // @ts-ignore
-  const user_id = req.user.user_id;
-  const data = await store.delete(user_id, req.params.id);
+  const data = await store.delete(req.body.user_id, req.params.id);
   res.status(200).json({ data });
 };
 

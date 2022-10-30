@@ -66,11 +66,7 @@ class Products {
       if (!user_id || !name || !price || !catagory) {
         throw new Error("Login and Provide name, price and catagory.");
       }
-      const values: Values = [];
-      values.push(user_id);
-      values.push(name);
-      values.push(price);
-      values.push(catagory);
+      const values: Values = [user_id, name, price, catagory];
       const options: Options = {
         table: "product",
         command: "INSERT INTO",

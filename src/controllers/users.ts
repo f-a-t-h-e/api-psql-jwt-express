@@ -33,7 +33,6 @@ const update = async (
 ): Promise<void> => {
   const user = await store.update(req.body.user_id, req.body);
   const token = jwt.sign(user, process.env.JWT_SECRET as string);
-
   res.status(201).json({ data: { user }, token });
 };
 const Delete = async (
@@ -41,9 +40,7 @@ const Delete = async (
   res: Response,
   _next: NextFunction
 ): Promise<void> => {
-  // @ts-ignore
-  const { user } = req;
-  const data = await store.delete(user.user_id);
+  const data = await store.delete(req.body.user_id);
   res.status(200).json({ data });
 };
 

@@ -1,18 +1,18 @@
 CREATE TABLE IF NOT EXISTS users (
         user_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-        email VARCHAR NOT NULL,
-        first_name VARCHAR NOT NULL,
-        last_name VARCHAR NOT NULL,
-        password text NOT NULL,
+        email VARCHAR(100) NOT NULL UNIQUE,
+        first_name VARCHAR(30) NOT NULL,
+        last_name VARCHAR(30) NOT NULL,
+        password CHAR(60) NOT NULL,
         date TIMESTAMP NOT NULL DEFAULT now()
 
     );
 CREATE TABLE IF NOT EXISTS products (
     product_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id uuid REFERENCES users(user_id) ON DELETE CASCADE,
-    name VARCHAR NOT NULL,
-    price INTEGER DEFAULT 0,
-    catagory VARCHAR,
+    name VARCHAR(30) NOT NULL,
+    price FLOAT DEFAULT 0,
+    catagory VARCHAR(15),
     date TIMESTAMP NOT NULL DEFAULT now()
 
 );

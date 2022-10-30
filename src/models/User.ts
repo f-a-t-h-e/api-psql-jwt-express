@@ -25,7 +25,6 @@ class Users {
         command: "SELECT",
       };
       const sql = generateSQL(options);
-      console.log(sql);
 
       const conn = await Client.connect();
       const result = await conn.query(sql);

@@ -1,7 +1,7 @@
 import supertest from "supertest";
-import { User } from "../../models/User";
 import app from "../../server";
 // interfaces
+import { User } from "../../models/User";
 
 const user_1: User = {
   email: "fathy@route.user",
@@ -51,7 +51,6 @@ describe("Test users emndpoint", () => {
       .send(user_1);
     const token = response.body.token;
     tokens.push(token);
-    console.log(response.body.data);
     expect(response.status).toBe(201);
     expect(response.body.data.user.user_id).toBe(user_1.user_id);
   });
@@ -62,3 +61,5 @@ describe("Test users emndpoint", () => {
     expect(response.status).toBe(200);
   });
 });
+
+export { user_1 };
