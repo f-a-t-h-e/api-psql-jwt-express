@@ -2,9 +2,11 @@ import dotenv from "dotenv";
 dotenv.config();
 import { NextFunction, Request, Response } from "express";
 import Users from "../models/User";
+import Orders from "../models/Order";
 import jwt from "jsonwebtoken";
 
 const store = new Users();
+const orderStore = new Orders()
 
 const getAll = async (
   _req: Request,
@@ -20,8 +22,9 @@ const getOne = async (
   res: Response,
   _next: NextFunction
 ): Promise<void> => {
-  const data = await store.getOne(req.params.id);
-  res.status(200).json({ data });
+const orders = await orderStore.getComplete(req.params.id)
+  const user = await store.getOne(req.params.id);
+  res.status(200).json({ data:{user,orders:orders.slice(0,5) });
 };
 const update = async (
   req: Request,
