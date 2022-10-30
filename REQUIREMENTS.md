@@ -27,9 +27,9 @@
 
 - Current Order by user (args: user id)[token required] [GET] /api/v1/orders/:id
 - [OPTIONAL] Completed Orders by user (args: user id)[token required] [GET] /api/v1/orders
-  [- Update [token required] [Patch] /api/v1/orders/:id
+  (- Update [token required] [Patch] /api/v1/orders/:id
   ,- Create [token required] [POST] /api/v1/orders
-  ,- Delete [token required] [DELETE] /api/v1/orders/:id ]
+  ,- Delete [token required] [DELETE] /api/v1/orders/:id )
 
 ## Data Shapes
 
@@ -42,15 +42,15 @@
 
 #### User
 
-- id [string]
+- user_id [string]
 - firstName [string]
 - lastName [string]
 - password [string]
 
 #### Orders
 
-- id [string]
+- order_id [string]
 - id of each product in the order [string]
-- quantity of each product in the order [string]
+- quantity of each product in the order [number]
 - user_id [string]
 - status of order (active or complete) [false:"active"|true:"complete"]
