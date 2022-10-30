@@ -48,11 +48,11 @@ describe("Test Orders model CRUD operations", () => {
   });
   // DELETE TEST ROWS
   afterAll(async () => {
-    await userStore.delete(users[0].user_id as string);
+    await userStore.delete(user_id);
   });
   it("should create orders", async () => {
-    const result = await orderStore.create(order_1);
-    expect(result.user_id).toBe(users[0].user_id);
+    const result = await orderStore.create(user_id);
+    expect(result.user_id).toBe(user_id);
     expect(result.order_id).toBeTruthy();
     expect(result.status).toBe("active");
 
@@ -62,7 +62,7 @@ describe("Test Orders model CRUD operations", () => {
   it("should get current order for a user", async () => {
     const result = await orderStore.getOne(user_id as string);
     expect(result.status).toBe("active");
-    expect(result.user_id).toBe(order_1.user_id);
+    expect(result.user_id).toBe(user_id);
     expect(result.order_id).toBe(order_1.order_id);
   });
   it("should update orders", async () => {
