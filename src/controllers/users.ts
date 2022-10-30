@@ -13,9 +13,9 @@ const getAll = async (
   res: Response,
   _next: NextFunction
 ): Promise<void> => {
-  const data = await store.getAll();
+  const users = await store.getAll();
 
-  res.status(200).json({ data });
+  res.status(200).json({ data: { users } });
 };
 const getOne = async (
   req: Request,
@@ -31,13 +31,10 @@ const update = async (
   res: Response,
   _next: NextFunction
 ): Promise<void> => {
-  // @ts-ignore
-  const { user } = req;
+  const user = await store.update(req.body.user_id, req.body);
+  const token = jwt.sign(user, process.env.JWT_SECRET as string);
 
-  const data = await store.update(user.user_id, req.body);
-  const token = jwt.sign(data, process.env.JWT_SECRET as string);
-
-  res.status(201).json({ data, token });
+  res.status(201).json({ data: { user }, token });
 };
 const Delete = async (
   req: Request,
