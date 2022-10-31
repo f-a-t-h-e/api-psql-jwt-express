@@ -54,3 +54,35 @@
 - quantity of each product in the order [number]
 - user_id [string]
 - status of order (active or complete) [false:"active"|true:"complete"]
+
+
+#### Database_schema 
+users
+- user_id uuid PRIMARY KEY [uuid]
+- email VARCHAR(100) [string]
+- first_name VARCHAR(30) [string]
+- last_name VARCHAR(30) [string]
+- password CHAR(60) [hash_string]
+- date TIMESTAMP [date]
+
+products
+- product_id uuid PRIMARY KEY [uuid]
+- user_id uuid REFERENCES users(user_id) [uuid]
+- name VARCHAR(30) [string]
+- price FLOAT [float]
+- catagory VARCHAR(15) [string]
+- date TIMESTAMP [date]
+
+orders
+- order_id uuid PRIMARY KEY [uuid]
+- user_id uuid REFERENCES users(user_id) [uuid]
+- status BOOLEAN [boolean]
+- date TIMESTAMP [date]
+
+bills
+- bill_id uuid PRIMARY KEY [uuid]
+- user_id uuid REFERENCES users(user_id) [uuid]
+- order_id uuid REFERENCES orders(order_id) [uuid]
+- product_id uuid REFERENCES products(product_id) [uuid]
+- quantity INTEGER [integer]
+- date TIMESTAMP [date]
