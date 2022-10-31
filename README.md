@@ -9,7 +9,14 @@ you will need the following to start this server:-
 -yarn
 
 setup:-
-run `yarn`,
+run `yarn`
+```
+yarn add global db-migrate
+```
+```
+psql -U postgres
+```
+Enter your password (if you have one).
 ```
 CREATE USER full_stack_user WITH PASSWORD 'password123';
 ```
