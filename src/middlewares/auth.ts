@@ -7,6 +7,7 @@ import Users, { User } from "../models/User";
 const store = new Users();
 
 const auth = async (req: Request, res: Response, next: NextFunction) => {
+try{
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     throw new Error("Access invaliddd.");
@@ -21,6 +22,9 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
   req.body.user_id = user.user_id;
 
   next();
+}catch(err){
+  throw new Error(`Couldn't auth: ${err}`);
+}
 };
 
 export default auth;
