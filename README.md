@@ -8,6 +8,12 @@ you will need the following to start this server:-
 
 -yarn
 
+Ports
+
+DB 5432
+
+Server 3000
+
 setup:-
 run `yarn`
 ```
